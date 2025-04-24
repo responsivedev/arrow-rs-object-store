@@ -406,8 +406,20 @@ impl RetryableRequest {
 
                     let do_retry = match e.kind() {
                         HttpErrorKind::Connect | HttpErrorKind::Request => true, // Request not sent, can retry
-                        HttpErrorKind::Timeout | HttpErrorKind::Interrupted => is_idempotent,
-                        HttpErrorKind::Unknown | HttpErrorKind::Decode => false,
+                        HttpErrorKind::Timeout | HttpErrorKind::Interrupted => {
+                            if is_idempotent {
+                                true
+                            } else {
+                                let kind = e.kind();
+                                info!("Failing retry due to error {kind:?} and idempotence not enabled");
+                                false
+                            }
+                        },
+                        HttpErrorKind::Unknown | HttpErrorKind::Decode => {
+                            let kind = e.kind();
+                            info!("Failing retry due to error {kind:?}");
+                            false
+                        },
                     };
 
                     if ctx.retries == ctx.max_retries
