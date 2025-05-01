@@ -226,6 +226,7 @@ impl ObjectStore for AmazonS3 {
                             // in flight, so we need to be prepared to retry
                             // 409 responses.
                             .retry_on_conflict(true)
+                            .idempotent(true)
                             .do_put()
                             .await
                         {
