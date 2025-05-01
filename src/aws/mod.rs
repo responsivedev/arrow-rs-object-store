@@ -183,7 +183,12 @@ impl ObjectStore for AmazonS3 {
             (PutMode::Overwrite, _) => request.idempotent(true).do_put().await,
             (PutMode::Create, S3ConditionalPut::Disabled) => Err(Error::NotImplemented),
             (PutMode::Create, S3ConditionalPut::ETagMatch) => {
-                match request.header(&IF_NONE_MATCH, "*").do_put().await {
+                match request
+                    .idempotent(true)
+                    .header(&IF_NONE_MATCH, "*")
+                    .do_put()
+                    .await
+                {
                     // Technically If-None-Match should return NotModified but some stores,
                     // such as R2, instead return PreconditionFailed
                     // https://developers.cloudflare.com/r2/api/s3/extensions/#conditional-operations-in-putobject

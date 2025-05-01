@@ -414,12 +414,12 @@ impl RetryableRequest {
                                 info!("Failing retry due to error {kind:?} and idempotence not enabled");
                                 false
                             }
-                        },
+                        }
                         HttpErrorKind::Unknown | HttpErrorKind::Decode => {
                             let kind = e.kind();
                             info!("Failing retry due to error {kind:?}");
                             false
-                        },
+                        }
                     };
 
                     if ctx.retries == ctx.max_retries
