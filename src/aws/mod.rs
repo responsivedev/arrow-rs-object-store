@@ -34,7 +34,6 @@ use futures::{StreamExt, TryStreamExt};
 use reqwest::header::{HeaderName, IF_MATCH, IF_NONE_MATCH};
 use reqwest::{Method, StatusCode};
 use std::{sync::Arc, time::Duration};
-use tracing::info;
 use url::Url;
 
 use crate::aws::client::{CompleteMultipartMode, PutPartPayload, RequestError, S3Client};
@@ -184,7 +183,6 @@ impl ObjectStore for AmazonS3 {
             (PutMode::Overwrite, _) => request.idempotent(true).do_put().await,
             (PutMode::Create, S3ConditionalPut::Disabled) => Err(Error::NotImplemented),
             (PutMode::Create, S3ConditionalPut::ETagMatch) => {
-                info!("Sending idempotent PUT request {:?}", request);
                 match request
                     .idempotent(true)
                     .header(&IF_NONE_MATCH, "*")
